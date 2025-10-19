@@ -32,7 +32,7 @@
             padding: 8px 0;
             white-space: nowrap;
             display: inline-block;
-            animation: marquee 25s linear infinite;
+            animation: marquee 35s linear infinite; /* Sedikit diperlambat untuk teks yang lebih panjang */
         }
         @keyframes marquee {
             0% { transform: translateX(100%); }
@@ -317,7 +317,7 @@
 
     <!-- Running Text Footer --><div class="running-text-container">
         <div class="running-text">
-            <p>Semongkoooo... Semangat Mengajar Sampai Kiamat... Allahu Akbar!!! &nbsp;&nbsp;&nbsp;&nbsp; Semongkoooo... Semangat Mengajar Sampai Kiamat... Allahu Akbar!!! &nbsp;&nbsp;&nbsp;&nbsp;</p>
+            <p>Setiap ketukan jari Ustadz dan Ustadzah hari ini adalah investasi untuk pemimpin masa depan. Terima kasih atas dedikasi tanpa batas di MBS. #SalamKangenJalanJalanLagi 😎 🚎 🚎 😎 &nbsp;&nbsp;&nbsp;&nbsp;</p>
         </div>
     </div>
 
@@ -345,8 +345,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // --- IMPORTANT: PASTE YOUR GOOGLE APPS SCRIPT URL HERE ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdx-BT6PheUHL6f4exyiMt_rV4hJ75fQA4i1i44NA7IUSo65kAWefDHnXh5QxDV06Q/exec"; // <-- PASTE URL DEPLOYMENT SCRIPT ANDA DI SINI
+    // --- PENTING: GANTI DENGAN URL DEPLOYMENT SCRIPT ANDA ---
+    // 1. Buka Proyek Google Apps Script Anda.
+    // 2. Klik "Deploy" > "New deployment".
+    // 3. Pastikan "Who has access" adalah "Anyone".
+    // 4. Klik "Deploy", lalu salin "Web app URL" dan tempel di bawah ini.
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKyTvC3XaL9zOzY2JocTD91y5LA8Fz3eQMllCjLRPJ3j31INxGoqnziFLfK4aQmj0/exec"; 
 
     // --- DOM Elements ---
     const levelSelect = document.getElementById('school-level');
@@ -516,17 +520,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function submitData() {
-        if (!SCRIPT_URL) {
+        if (!SCRIPT_URL || SCRIPT_URL === "GANTI_DENGAN_URL_SCRIPT_ANDA_DISINI") {
             showToast("URL Google Apps Script belum diatur!", 'error');
             return;
         }
         
-        setLoadingState(true);
-        closeModal();
-        resetToSelection();
+        // --- PERBAIKAN DIMULAI DI SINI ---
         
-        showToast('Mengirim data nilai ke spreadsheet...', 'info');
-
+        // 1. Ambil data SEBELUM mereset tampilan
         const className = classSelect.value;
         const subject = subjectSelect.value;
         
@@ -544,6 +545,15 @@ document.addEventListener('DOMContentLoaded', function() {
             grades: gradesData
         };
 
+        // 2. Sekarang baru atur tampilan (loading, tutup modal, reset)
+        setLoadingState(true);
+        closeModal();
+        resetToSelection();
+        
+        showToast('Mengirim data nilai ke spreadsheet...', 'info');
+
+
+        // 3. Kirim data yang sudah disimpan
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
@@ -603,7 +613,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Event Listeners ---
     levelSelect.addEventListener('change', updateDropdowns);
     classSelect.addEventListener('change', validateSelections);
-    subjectSelect.addEventListener('change', validateSelections);
     startInputBtn.addEventListener('click', startGradeInput);
     changeSelectionBtn.addEventListener('click', resetToSelection);
     previewBtn.addEventListener('click', showPreview);
@@ -620,6 +629,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Validasi saat dropdown mata pelajaran berubah
+    subjectSelect.addEventListener('change', validateSelections);
 });
 </script>
 </body>
