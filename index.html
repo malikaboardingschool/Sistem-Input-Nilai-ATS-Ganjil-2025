@@ -111,12 +111,7 @@
             border-color: #007AFF;
             ring-color: #007AFF;
         }
-        input.grade-input:disabled {
-            background-color: rgba(80, 80, 80, 0.5);
-            color: #a0a0a0;
-            cursor: not-allowed;
-        }
-
+        
         /* Gradient Text */
         .gradient-text-apple {
             background: linear-gradient(to right, #5AC8FA, #BF5AF2, #FF2D55);
@@ -144,31 +139,6 @@
         .table-row-dark:hover {
             background-color: rgba(40, 40, 42, 0.6);
         }
-        
-        /* Tombol Status Baru */
-        .status-btn {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            border-radius: 0.375rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .status-btn.susulan {
-            background-color: #ff9500; /* Orange */
-            color: white;
-        }
-        .status-btn.susulan:hover {
-            background-color: #ffb443;
-        }
-        .status-btn.batal {
-            background-color: #555;
-            color: #ddd;
-        }
-        .status-btn.batal:hover {
-            background-color: #777;
-        }
-
 
         /* Modal specific dark styles */
         #preview-modal .bg-white { /* Target modal content */
@@ -254,8 +224,7 @@
                         <tr>
                             <th scope="col" class="px-6 py-3 rounded-l-lg w-16">No.</th>
                             <th scope="col" class="px-6 py-3">Nama Santri</th>
-                            <th scope="col" class="px-6 py-3 text-center">Nilai (10-100)</th>
-                            <th scope="col" class="px-6 py-3 rounded-r-lg text-center">Aksi</th>
+                            <th scope="col" class="px-6 py-3 rounded-r-lg text-center">Nilai (10-100 atau -)</th>
                         </tr>
                     </thead>
                     <tbody id="student-list-body"></tbody>
@@ -312,7 +281,7 @@
 
     <!-- Running Text Footer --><div class="running-text-container">
         <div class="running-text">
-            <p>Setiap ketukan jari Ustadz dan Ustadzah hari ini, adalah investasi kita bersama untuk pemimpin masa depan. Terima kasih atas dedikasi tanpa batas #SalamKangenJalanJalanLagi 🚌 🛫 ✈️ ✈️ 🛵 😎  . &nbsp;&nbsp;&nbsp;&nbsp;</p>
+            <p>Setiap ketukan jari Ustadz dan Ustadzah hari ini, adalah investasi kita bersama untuk pemimpin masa depan. Terima kasih atas dedikasi tanpa batas #SalamKangenJalanJalanLagi 🛵 🛫 🚌 😎  &nbsp;&nbsp;&nbsp;&nbsp; Setiap ketukan jari Ustadz dan Ustadzah hari ini, adalah investasi kita bersama untuk pemimpin masa depan. Terima kasih atas dedikasi tanpa batas #SalamKangenJalanJalanLagi . &nbsp;&nbsp;&nbsp;&nbsp;</p>
         </div>
     </div>
 
@@ -341,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     // --- PENTING: GANTI DENGAN URL DEPLOYMENT SCRIPT ANDA ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKjIMWw0kjImjXrWPTWTGCFEopmkCqwoFyK2DLQoU1cRZiumxzDS0LEZBJd7xac-Q/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydoOCTCTri8WEhT6RcbGQNxOQHrrIdmsad69SgbaNRMmtknygxetSSLYIFxsUrWkQz/exec"; 
 
     // --- DOM Elements ---
     const levelSelect = document.getElementById('school-level');
@@ -402,10 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td class="px-6 py-4 font-medium text-white/90">${index + 1}</td>
                 <td class="px-6 py-4 student-name">${student}</td>
                 <td class="px-6 py-4">
-                    <input type="number" min="10" max="100" class="grade-input w-full p-2 border rounded-md text-center" placeholder="10-100">
-                </td>
-                <td class="px-6 py-4 text-center">
-                    <button class="status-btn susulan" data-action="susulan">Susulan</button>
+                    <input type="text" class="grade-input w-full p-2 border rounded-md text-center" placeholder="10-100 atau -">
                 </td>
             `;
             studentListBody.appendChild(row);
@@ -413,28 +379,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         selectionForm.classList.add('hidden');
         gradeInputSection.classList.remove('hidden');
-    }
-
-    function toggleStudentStatus(button) {
-        const row = button.closest('tr');
-        const input = row.querySelector('.grade-input');
-
-        if (button.dataset.action === 'susulan') {
-            input.disabled = true;
-            input.value = "SUSULAN";
-            button.textContent = "Batal";
-            button.dataset.action = "batal";
-            button.classList.remove('susulan');
-            button.classList.add('batal');
-        } else {
-            input.disabled = false;
-            input.value = "";
-            input.focus();
-            button.textContent = "Susulan";
-            button.dataset.action = "susulan";
-            button.classList.remove('batal');
-            button.classList.add('susulan');
-        }
     }
 
     function resetToSelection() {
@@ -451,23 +395,24 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('#student-list-body tr').forEach(row => {
             const name = row.querySelector('.student-name').textContent;
             const input = row.querySelector('.grade-input');
-            const value = input.value;
+            const value = input.value.trim();
             
-            // Validasi baru: nilai valid jika "SUSULAN" atau angka 10-100
-            const isSusulan = value === 'SUSULAN';
-            const isNumericValid = !isNaN(value) && value >= 10 && value <= 100;
+            const isHyphen = value === '-';
+            const isNumeric = !isNaN(value) && value !== ''; // Check numeric and not empty
+            const isNumericValid = isNumeric && Number(value) >= 10 && Number(value) <= 100;
 
-            if (!isSusulan && !isNumericValid) {
-                allInputsValid = false;
-                input.style.borderColor = 'red';
-            } else {
+            if (isHyphen || isNumericValid) {
                 input.style.borderColor = '';
+                input.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
+            } else {
+                allInputsValid = false;
+                input.classList.add('border-red-500', 'ring-2', 'ring-red-500');
             }
             grades.push({ name, value: value === '' ? 'BELUM DIISI' : value });
         });
 
         if (!allInputsValid) {
-            showToast('Harap isi semua nilai dengan angka 10-100, atau tandai sebagai "SUSULAN".', 'error');
+            showToast('Harap isi semua nilai dengan angka 10-100, atau tanda (-).', 'error');
             return;
         }
 
@@ -566,14 +511,6 @@ document.addEventListener('DOMContentLoaded', function() {
     changeSelectionBtn.addEventListener('click', resetToSelection);
     previewBtn.addEventListener('click', showPreview);
     
-    // Event listener untuk tombol status (delegasi event)
-    studentListBody.addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('status-btn')) {
-            toggleStudentStatus(e.target);
-        }
-    });
-
-    // Modal listeners
     document.getElementById('close-modal-btn').addEventListener('click', closeModal);
     document.getElementById('cancel-btn').addEventListener('click', closeModal);
     confirmSubmitBtn.addEventListener('click', submitData);
